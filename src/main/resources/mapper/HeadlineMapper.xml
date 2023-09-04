@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crab.mapper.HeadlineMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.crab.entity.Headline">
+        <id column="hid" property="hid" />
+        <result column="title" property="title" />
+        <result column="article" property="article" />
+        <result column="type" property="type" />
+        <result column="publisher" property="publisher" />
+        <result column="page_views" property="pageViews" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="version" property="version" />
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        hid, title, article, type, publisher, page_views, create_time, update_time, version, is_deleted
+    </sql>
+
+
+
+    <select id="selectPageMap" resultType="map">
+        select hid,title,type,page_views pageViews,TIMESTAMPDIFF(HOUR,create_time,NOW()) pastHours,
+        publisher from news_headline where is_deleted=0
+        <if test="portalVo.keyWords !=null and portalVo.keyWords.length()>0 ">
+            and title like concat('%',#{portalVo.keyWords},'%')
+        </if>
+        <if test="portalVo.type != 0">
+            and type = #{portalVo.type}
+        </if>
+    </select>
+
+    <!--    Map selectDetailMap(Integer hid);-->
+    <select id="selectDetailMap" resultType="map">
+    select hid,title,article,type, h.version ,tname typeName ,page_views pageViews
+            ,TIMESTAMPDIFF(HOUR,create_time,NOW()) pastHours,publisher
+                    ,nick_name author from news_headline h
+                        left join news_type t on h.type = t.tid
+                                left join news_user u  on h.publisher = u.uid
+                                            where hid = #{hid}
+</select>
+
+</mapper>
